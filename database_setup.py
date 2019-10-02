@@ -1,8 +1,8 @@
 import sys
 
-from sqlalchemy import Column, Foreignkey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 
-from sqlalchemy.ext.declarative import declarative_base()
+from sqlalchemy.ext.declarative import declarative_base
 
 
 from sqlalchemy.orm import relationship
@@ -22,8 +22,16 @@ class Item(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(80), nullable = False)
     description = Column(String(250))
-    category_id = Column(Integer, Foreignkey('category.id'))
+    category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category)
+
+    @property
+    def serialize(self):
+        return{
+            'neme':self.name,
+            'description':self.description,
+            'id':self.id
+        }
 
 ###############################################################################
 engine = create_engine('sqlite:///categoriesmenu.db')
