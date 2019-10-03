@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <h1>{{item.name}}</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <li><strong> {{message}} </strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+      </br></br></br>
+    {{item.name}}
+    </br>
+    {{item.description}}
+    </br>
+    {{item.category_id}}
+    </br>
+      <a href='{{url_for('editItem', category_id=category_id, item_id= item.id)}}'> Edit </a>
+      <a href='{{url_for('deleteItem', category_id=category_id, item_id= item.id)}}'> Delete </a>
+    </br>
+    </br>
+  </body>
+</html>

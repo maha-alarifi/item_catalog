@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <h1>The Categories</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <li><strong> {{message}} </strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    
+    <a href='{{url_for('newCategory')}}'> New Category </a>
+      </br></br></br>
+    {% for c in categories %}
+    {{c.name}}
+    </br>
+    <a href='{{url_for('editCategory', category_id=c.id)}}'> Edit </a>
+    </br>
+    <a href='{{url_for('deleteCategory', category_id=c.id)}}'> Delete </a>
+    </br>
+    </br>
+    </br></br></br>
+
+    {% endfor %}
+  </body>
+</html>
