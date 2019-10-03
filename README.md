@@ -1,6 +1,7 @@
-# Item Catalog Project of Udacity Fullstack Web Development Nanodegree
+# Item Catalog
+## Project of Udacity Fullstack Web Development Nanodegree
 
-## Pre-Requisites and Environment Preparation
+### Pre-Requisites and Environment Preparation
 #### First (get resources from the web):
 - Download Git : https://git-scm.com/downloads
 - Download Virtual Box :  https://www.virtualbox.org/wiki/Download_Old_Builds_5_1
@@ -24,3 +25,9 @@ In order to complete these steps you have to be inside vagrant file
 - Type the command : python app.py
 - open "localhost:5000/categories" on your browser
 - Navigate on the web application :)
+
+### About this project
+In this project I tried my best to provide a web-app that is feasible to brows categories and the items for each category.
+Also in this web-app users can create, edit and delete both categories and items with some restrictions.
+The first restriction is the user most be signed in to manipulate the existed data.
+The second restriction is the user can only manipulate the categories and items created by them. 
