@@ -5,12 +5,30 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item
 #=============================================================================#
+from flask import session as login_session
+import random, string
+
+from oauth2client.client import flow_from_clientsecret
+from oauth2client.client import FlowExchangeError
+import httplib2
+import json
+from flask import make_response
+import requests
+
+CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
+#=============================================================================#
 engine = create_engine('sqlite:///categoriesmenu.db', connect_args={'check_same_thread': False})
 Base.metadata.bind = engine
 #=============================================================================#
 DBSession = sessionmaker(bind = engine)
 session = DBSession()
 ###############################################################################
+@app.route('/login')
+def showLogin():
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    login_session['state'] = state
+    return render_template('login.html', STATE=state)
+
 
 @app.route('/categories/<int:category_id>/JSON')
 def categoryJSON(category_id):
