@@ -133,14 +133,17 @@ def gdisconnect():
         response = make_response(json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
+
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
     print login_session['username']
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
     print result
+
     if result['status'] == '200':
         del login_session['access_token']
         del login_session['gplus_id']
@@ -176,7 +179,10 @@ def categoryJSON(category_id):
 @app.route('/categories/')
 def listCategories():
     categories = session.query(Category)
-    return render_template('categories.html', categories=categories)
+    if 'username' not in login_session:
+        return render_template('pub_categor.html', categories=categories)
+    else:
+        return render_template('categories.html', categories=categories)
 
 #=============================================================================#
 
@@ -200,15 +206,18 @@ def editCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
     editedCategory = session.query(Category).filter_by(id = category_id).one()
-    if request.method=='POST':
-        if request.form['name']:
-            editedCategory.name = request.form['name']
-        session.add(editedCategory)
-        session.commit()
-        flash('Category is edited!')
-        return redirect(url_for('listCategories'))
+    if editedCategory.user_id != login_session['user_id']:
+        return render_template('alert.html')
     else :
-        return render_template('editCategory.html', category_id=category_id, c=editedCategory)
+        if request.method=='POST':
+            if request.form['name']:
+                editedCategory.name = request.form['name']
+            session.add(editedCategory)
+            session.commit()
+            flash('Category is edited!')
+            return redirect(url_for('listCategories'))
+        else :
+            return render_template('editCategory.html', category_id=category_id, c=editedCategory)
 
 #=============================================================================#
 
@@ -217,13 +226,16 @@ def deleteCategory(category_id):
     if 'username' not in login_session:
         return redirect('/login')
     toDeleteCategory = session.query(Category).filter_by(id = category_id).one()
-    if request.method=='POST':
-        session.delete(toDeleteCategory)
-        session.commit()
-        flash('Category is deleted!')
-        return redirect(url_for('listCategories'))
+    if toDeleteCategory.user_id != login_session['user_id']:
+        return render_template('alert.html')
     else:
-        return render_template('deleteCategory.html', category_id=category_id, c=toDeleteCategory)
+        if request.method=='POST':
+            session.delete(toDeleteCategory)
+            session.commit()
+            flash('Category is deleted!')
+            return redirect(url_for('listCategories'))
+        else:
+            return render_template('deleteCategory.html', category_id=category_id, c=toDeleteCategory)
 
 #=============================================================================#
 
@@ -239,14 +251,18 @@ def listCategory(category_id):
 def newItem(category_id):
     if 'username' not in login_session:
         return redirect('/login')
-    if request.method=='POST':
-        item=Item(name = request.form['name'], category_id=category_id, user_id= login_session['user_id'])
-        session.add(item)
-        session.commit()
-        flash('new item is added!')
-        return redirect(url_for('listCategory', category_id=category_id))
+    category = session.query(Category).filter_by(id = category_id).one()
+    if category.user_id != login_session['user_id']:
+        return render_template('alert.html')
     else :
-        return render_template('newItem.html', category_id=category_id)
+        if request.method=='POST':
+            item=Item(name = request.form['name'], category_id=category_id, user_id= login_session['user_id'])
+            session.add(item)
+            session.commit()
+            flash('new item is added!')
+            return redirect(url_for('listCategory', category_id=category_id))
+        else :
+            return render_template('newItem.html', category_id=category_id)
 
 #=============================================================================#
 
@@ -255,19 +271,22 @@ def editItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
     editedItem = session.query(Item).filter_by(id = item_id).one()
-    if request.method=='POST':
-        if request.form['name']:
-            editedItem.name = request.form['name']
-        if request.form['description']:
-            editedItem.description = request.form['description']
-        if request.form['category']:
-            editedItem.category_id = request.form['category']
-        session.add(editedItem)
-        session.commit()
-        flash('item is edited!')
-        return redirect(url_for('listCategory', category_id=category_id))
-    else :
-        return render_template('editItem.html', category_id=category_id, item_id=item_id, i=editedItem)
+    if editedItem.user_id != login_session['user_id']:
+        return render_template('item_alert.html')
+    else:
+        if request.method=='POST':
+            if request.form['name']:
+                editedItem.name = request.form['name']
+            if request.form['description']:
+                editedItem.description = request.form['description']
+            if request.form['category']:
+                editedItem.category_id = request.form['category']
+            session.add(editedItem)
+            session.commit()
+            flash('item is edited!')
+            return redirect(url_for('listCategory', category_id=category_id))
+        else :
+            return render_template('editItem.html', category_id=category_id, item_id=item_id, i=editedItem)
 
 #=============================================================================#
 
@@ -276,13 +295,16 @@ def deleteItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
     toDeleteItem = session.query(Item).filter_by(id = item_id).one()
-    if request.method=='POST':
-        session.delete(toDeleteItem)
-        session.commit()
-        flash('item is deleted!')
-        return redirect(url_for('listCategory', category_id=category_id))
-    else:
-        return render_template('deleteItem.html', category_id=category_id, item_id=item_id, i=toDeleteItem)
+    if toDeleteItem.user_id != login_session['user_id']:
+        return render_template('item_alert.html')
+    else :
+        if request.method=='POST':
+            session.delete(toDeleteItem)
+            session.commit()
+            flash('item is deleted!')
+            return redirect(url_for('listCategory', category_id=category_id))
+        else:
+            return render_template('deleteItem.html', category_id=category_id, item_id=item_id, i=toDeleteItem)
 
 #=============================================================================#
 
