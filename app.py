@@ -161,18 +161,17 @@ def gdisconnect():
 #=============================================================================#
 
 @app.route('/categories/<int:category_id>/JSON')
-def categoryJSON(category_id):
+def itemJSON(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     items = session.query(Item).filter_by(category_id=category_id).all()
     return jsonify(Item=[i.serialize for i in items])
 
 #=============================================================================#
 
-# @app.route('/categories/JSON')
-# def categoryJSON(category_id):
-#     category = session.query(Category).filter_by(id=category_id).one()
-#     items = session.query(Item).filter_by(category_id=category_id).all()
-#     return jsonify(Item=[i.serialize for i in items])
+@app.route('/categories/JSON')
+def categoryJSON():
+    category = session.query(Category).filter_by().all()
+    return jsonify(Category=[c.serialize for c in category])
 #=============================================================================#
 
 @app.route('/')
@@ -192,9 +191,12 @@ def newCategory():
         return redirect('/login')
     if request.method=='POST':
         category = Category(name = request.form['name'], user_id = login_session['user_id'])
-        session.add(category)
-        session.commit()
-        flash('new category is added!')
+        if category.name != '':
+            session.add(category)
+            session.commit()
+            flash('new category is added!')
+        else :
+            flash('Empty is not allowed!')
         return redirect(url_for('listCategories'))
     else :
         return render_template('newCategory.html')
@@ -257,9 +259,12 @@ def newItem(category_id):
     else :
         if request.method=='POST':
             item=Item(name = request.form['name'], category_id=category_id, user_id= login_session['user_id'])
-            session.add(item)
-            session.commit()
-            flash('new item is added!')
+            if item.name != '':
+                session.add(item)
+                session.commit()
+                flash('new item is added!')
+            else :
+                flash('Empty is not allowed!')
             return redirect(url_for('listCategory', category_id=category_id))
         else :
             return render_template('newItem.html', category_id=category_id)
